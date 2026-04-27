@@ -33,7 +33,9 @@ Instead of the standard Cell Ranger pipeline, we implemented **RNA STARsolo**, a
 Mapping quality was verified by aggregating STAR log files via **MultiQC**. 
 * **Key Metric:** We monitored **Uniquely Mapped Reads** (aiming for >75%) to verify that cDNA reads correctly aligned to the human genome without high rates of multi-mapping or unmapped noise.
 
-**[IMAGE PLACEHOLDER: Insert MultiQC STAR alignment plot here]**
+**[MultiQC STAR Alignment Plot]**
+<img width="1600" height="800" alt="MultiQC_star_alignment_plot" src="https://github.com/user-attachments/assets/832a9cd5-8617-430f-b96f-4f65095bc39a" />
+
 
 ### 3. Statistical Cell Calling (DropletUtils)
 The raw output from STARsolo contains approximately **5,200 barcodes**, the vast majority of which represent empty droplets containing only ambient (background) RNA. We applied two methods within the **DropletUtils** suite to recover "real" cells:
@@ -43,7 +45,9 @@ The raw output from STARsolo contains approximately **5,200 barcodes**, the vast
     * **Lower-bound Threshold:** 200 UMIs.
     * **FDR:** 0.01 (limiting false positives to 1%).
 
-**[IMAGE PLACEHOLDER: Insert Barcode Rank/Knee Plot here]**
+**[Barcode Rank Plot]**
+<img width="460" height="420" alt="DropletUtils_Barcode_Ranks_Plot" src="https://github.com/user-attachments/assets/86411fea-fef0-4cb2-8add-935feaf6cde9" />
+
 
 ---
 
@@ -52,6 +56,9 @@ The raw output from STARsolo contains approximately **5,200 barcodes**, the vast
 The successful execution of the upstream pipeline produced the following technical deliverables:
 
 * **Final Cell Count:** ~279-300 validated high-quality cells.
+**[Detected Cells Plot]**
+<img width="470" height="439" alt="DropletUtils_Detected_Cells_Plot" src="https://github.com/user-attachments/assets/56b9cf4a-3951-468d-a355-7d9ea16b2de1" />
+
 * **Data Structures:** * `matrix.mtx`: The digital gene expression (DGE) matrix in sparse format.
     * `genes.tsv`: List of Ensembl IDs and Gene Symbols.
     * `barcodes.tsv`: List of validated 10X cell barcodes.
