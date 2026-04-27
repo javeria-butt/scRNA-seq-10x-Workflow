@@ -1,48 +1,65 @@
-# 01. Pre-processing of 10X Single-Cell RNA Datasets
+# 01. Pre-processing of scRNA datasets
 
-This sub-repository documents the **upstream processing** of raw single-cell RNA sequencing (scRNA-seq) data. The workflow covers the transition from raw sequencing reads (FASTQ) to a filtered, high-quality digital gene expression matrix.
+This repository documents the complete upstream analysis of a 10X Genomics single-cell RNA-seq (scRNA-seq) dataset. The workflow transitions from raw FASTQ files to a filtered, high-quality count matrix suitable for downstream clustering and biological interpretation.
 
 ---
 
-## Section 1: Biological Context & Technical Specifications
-The primary objective of this analysis is to resolve cellular heterogeneity within a population of immune cells.
+## Section 1: Biological Context & Library Architecture
 
-* **Sample Data:** 1k Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor. 
-* **Sequencing Technology:** **10X Genomics Chromium System**. This method uses a droplet-based approach where individual cells are encapsulated in nanoliter droplets with barcoded gel beads.
-* **Library Architecture:** **Chromium v3 Chemistry**. 
-    * **Read 1:** Contains the 16bp Cell Barcode (CB) and 12bp Unique Molecular Identifier (UMI).
-    * **Read 2:** Contains the cDNA sequence (RNA transcript info).
-* **Reference Genome:** Human **hg19 (GRCh37)** with associated Ensembl gene annotations.
+### The Era of 1k PBMCs
+The study focuses on **1,000 Peripheral Blood Mononuclear Cells (PBMCs)** from a healthy donor. PBMCs are primary cells characterized by low RNA content (~1pg RNA/cell), making them an ideal model for testing the sensitivity of droplet-based sequencing.
 
-## Section 2: Technical Methodology & Implementation
-The upstream pipeline was executed using the **Galaxy** platform, utilizing high-performance alignment and quantification tools to handle the high-throughput nature of the 10X data.
+### 10X Chromium Technology
+We utilized the **10X Chromium system**, which isolates single cells into nanoliter droplets (GEMs - Gel Bead-in-Emulsion).
+* **Barcoding:** Each droplet contains a unique 10x barcode that indexes all transcripts from a single cell.
+* **Chemistry:** This dataset utilizes **Chromium v3**.
+    * **Read 1 (28bp):** 16bp Cell Barcode + 12bp Unique Molecular Identifier (UMI).
+    * **Read 2 (91bp):** Contains the cDNA sequence mapped to the transcriptome.
+* **Whitelist:** Barcodes were validated against the **3M-february-2018.txt** whitelist to ensure reads were assigned to known, high-quality gel beads.
 
-### 1. Data Organization & QC
-* **Tool:** `Galaxy Data Upload` / `MultiQC`
-* **Action:** Imported sub-sampled FASTQ files (Lanes L001 and L002). Preliminary quality checks were performed to ensure base-call accuracy and identify the library chemistry (28bp Read 1 confirms v3 chemistry).
+---
 
-### 2. Demultiplexing, Mapping, and Quantification
-* **Tool:** `RNA STARsolo`
-* **Process:** * **Mapping:** Read 2 sequences were aligned to the hg19 reference.
-    * **Demultiplexing:** Read 1 barcodes were matched against the **3M-february-2018 whitelist** to assign reads to specific cells.
-    * **Quantification:** UMIs were deduplicated using the **CellRanger2-4 algorithm** to collapse PCR duplicates and provide an accurate count of unique mRNA molecules.
+## Section 2: Technical Methodology & Pipeline
 
-### 3. Barcode Filtering (Empty Droplet Removal)
-* **Tool:** `DropletUtils`
-* **Process:** A raw matrix typically contains thousands of barcodes that represent empty droplets or ambient RNA. We used the **"Rank Barcodes"** and **"EmptyDrops"** methods to identify the inflection point (knee) in the barcode rank plot, filtering the dataset down to high-quality, "real" cells.
+The analysis was performed on the **Galaxy** platform using a sub-sampled dataset (approx. 300 cells) for computational efficiency.
 
-## Section 3: Analysis Results & Data Outputs
-The successful execution of the pipeline produced a structured count matrix ready for downstream biological analysis.
+### 1. Producing the Count Matrix (STARsolo)
+Instead of the standard Cell Ranger pipeline, we implemented **RNA STARsolo**, a significantly faster "drop-in" solution that provides identical results with more transparent configuration.
+* **Mapping:** Reads were aligned to the **Human hg19 (GRCh37)** reference genome using the **Gencode/Ensembl GTF** annotation.
+* **UMI Deduplication:** To remove PCR amplification bias, we applied the **CellRanger 2-4 algorithm** to collapse UMIs, ensuring each mRNA molecule is counted only once.
+* **Strandedness:** The library was processed as "Read strand same as original RNA molecule."
 
-### Output Statistics:
-* **Raw Barcodes Detected:** Approximately **5,200** initial barcodes identified by STARsolo (labeled as `yesCellBarcodes`).
-* **Final Cell Count:** Approximately **300** high-quality cells (post-filtering of the sub-sampled dataset).
-* **Data Format:** The results are stored in a **Matrix Market (MTX)** bundle, which includes:
-    1.  `matrix.mtx`: The sparse count matrix.
-    2.  `barcodes.tsv`: The unique identifiers for each validated cell.
-    3.  `genes.tsv`: The list of identified gene symbols and Ensembl IDs.
+### 2. Quality Control (MultiQC)
+Mapping quality was verified by aggregating STAR log files via **MultiQC**. 
+* **Key Metric:** We monitored **Uniquely Mapped Reads** (aiming for >75%) to verify that cDNA reads correctly aligned to the human genome without high rates of multi-mapping or unmapped noise.
 
-### Access the Analysis:
-For full transparency and reproducibility, the complete Galaxy history, including all tool parameters and intermediate steps, can be accessed at the following link:
+**[IMAGE PLACEHOLDER: Insert MultiQC STAR alignment plot here]**
 
-**[View Galaxy History: scRNA-seq Preprocessing](https://galaxy-main.usegalaxy.org/u/javeriabutt/h/scrna-seq-preprocessing)**
+### 3. Statistical Cell Calling (DropletUtils)
+The raw output from STARsolo contains approximately **5,200 barcodes**, the vast majority of which represent empty droplets containing only ambient (background) RNA. We applied two methods within the **DropletUtils** suite to recover "real" cells:
+
+* **The Rank Barcodes Method:** We generated a **Barcode Rank Plot** (Log-Total UMI vs Log-Rank). We identified the **Knee point** (where the UMI count drops significantly) and the **Inflection point** (the lower boundary of high-quality cells).
+* **The EmptyDrops Method:** We applied a Dirichlet-multinomial model to identify droplets whose RNA profile significantly differs from the ambient "background" pool.
+    * **Lower-bound Threshold:** 200 UMIs.
+    * **FDR:** 0.01 (limiting false positives to 1%).
+
+**[IMAGE PLACEHOLDER: Insert Barcode Rank/Knee Plot here]**
+
+---
+
+## Section 3: Technical Results & Outputs
+
+The successful execution of the upstream pipeline produced the following technical deliverables:
+
+* **Final Cell Count:** ~279-300 validated high-quality cells.
+* **Data Structures:** * `matrix.mtx`: The digital gene expression (DGE) matrix in sparse format.
+    * `genes.tsv`: List of Ensembl IDs and Gene Symbols.
+    * `barcodes.tsv`: List of validated 10X cell barcodes.
+
+### Reproducibility & Provenance
+For full transparency, the complete Galaxy history, including every tool parameter used (STARsolo, MultiQC, DropletUtils), is available here:
+
+**[Link to Shared Galaxy History](https://galaxy-main.usegalaxy.org/u/javeriabutt/h/scrna-seq-preprocessing)**
+
+---
+*Developed as part of the Single Cell Galaxy Portal training.*
