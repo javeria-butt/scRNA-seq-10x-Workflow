@@ -29,11 +29,16 @@ Instead of the standard Cell Ranger pipeline, we implemented **RNA STARsolo**, a
 * **UMI Deduplication:** To remove PCR amplification bias, we applied the **CellRanger 2-4 algorithm** to collapse UMIs, ensuring each mRNA molecule is counted only once.
 * **Strandedness:** The library was processed as "Read strand same as original RNA molecule."
 
+**UCSC Alignments**
+<img width="1340" height="584" alt="5_RNA STARSolo on 1-6_Alignments(USCS)" src="https://github.com/user-attachments/assets/3b81c111-877e-4a93-9e98-30a188fff947" />
+
+
+
 ### 2. Quality Control (MultiQC)
 Mapping quality was verified by aggregating STAR log files via **MultiQC**. 
 * **Key Metric:** We monitored **Uniquely Mapped Reads** (aiming for >75%) to verify that cDNA reads correctly aligned to the human genome without high rates of multi-mapping or unmapped noise.
 
-**[MultiQC STAR Alignment Plot]**
+**MultiQC STAR Alignment Plot**
 <img width="1600" height="800" alt="MultiQC_star_alignment_plot" src="https://github.com/user-attachments/assets/832a9cd5-8617-430f-b96f-4f65095bc39a" />
 
 
@@ -45,7 +50,7 @@ The raw output from STARsolo contains approximately **5,200 barcodes**, the vast
     * **Lower-bound Threshold:** 200 UMIs.
     * **FDR:** 0.01 (limiting false positives to 1%).
 
-**[Barcode Rank Plot]**
+**Barcode Rank Plot**
 <img width="460" height="420" alt="DropletUtils_Barcode_Ranks_Plot" src="https://github.com/user-attachments/assets/86411fea-fef0-4cb2-8add-935feaf6cde9" />
 
 
@@ -56,7 +61,8 @@ The raw output from STARsolo contains approximately **5,200 barcodes**, the vast
 The successful execution of the upstream pipeline produced the following technical deliverables:
 
 * **Final Cell Count:** ~279-300 validated high-quality cells.
-**[Detected Cells Plot]**
+
+**Detected Cells Plot**
 <img width="470" height="439" alt="DropletUtils_Detected_Cells_Plot" src="https://github.com/user-attachments/assets/56b9cf4a-3951-468d-a355-7d9ea16b2de1" />
 
 * **Data Structures:** * `matrix.mtx`: The digital gene expression (DGE) matrix in sparse format.
