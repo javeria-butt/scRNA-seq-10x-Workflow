@@ -27,42 +27,42 @@ This repository documents the completion of the Scanpy basic scRNA-seq tutorial 
 Single-cell RNA sequencing (scRNA-seq) allows the measurement of gene expression in individual cells rather than bulk tissue, revealing cellular heterogeneity that would otherwise be masked. This tutorial demonstrates how to process, cluster, and annotate single-cell data using the Scanpy ecosystem.
 
 ---
-
 ## Pipeline Summary
-Raw count matrix (10x MTX format)
-│
-▼
-[AnnData object]
-│
-▼
-[Quality Control]
-│
-▼
-[Normalisation + Log transform]
-│
-▼
-[Highly Variable Genes]
-│
-▼
-[Regress out confounders]
-│
-▼
-[PCA]
-│
-▼
-[Neighbourhood graph]
-│
-▼
-[UMAP + t-SNE]
-│
-▼
-[Louvain clustering]
-│
-▼
-[Marker genes]
-│
-▼
-[Cell type annotation]
+
+Raw count matrix (10x MTX format)  
+│  
+▼  
+[AnnData object]  
+│  
+▼  
+[Quality Control]  
+│  
+▼  
+[Normalisation + Log transform]  
+│  
+▼  
+[Highly Variable Genes]  
+│  
+▼  
+[Regress out confounders]  
+│  
+▼  
+[PCA]  
+│  
+▼  
+[Neighbourhood graph]  
+│  
+▼  
+[UMAP + t-SNE]  
+│  
+▼  
+[Louvain clustering]  
+│  
+▼  
+[Marker genes]  
+│  
+▼  
+[Cell type annotation]  
 
 
 ---
@@ -204,7 +204,8 @@ bash
 ```
 pip install -r requirements.txt
 ```
-##Usage
+##Usage##
+
 bash
 ```
 git clone https://github.com/javeria-butt/scRNA-seq-10x-Workflow.git
